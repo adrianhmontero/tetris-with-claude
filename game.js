@@ -600,6 +600,7 @@ function submitRecord() {
   overlayResetBtn.classList.remove('hidden');
   restartBtn.style.display = '';
   renderRecords(overlayRecordsEl, idx < MAX_RECORDS ? idx : null);
+  renderSideScores();
   restartBtn.focus();
 }
 
@@ -678,11 +679,13 @@ function resetRecords() {
     localStorage.removeItem(BESTS_KEY);
   } catch (e) {}
   renderRecords(startRecordsEl, null);
+  renderSideScores();
   if (!overlayRecordsEl.classList.contains('hidden')) renderRecords(overlayRecordsEl, null);
 }
 
 function showStartScreen() {
   renderRecords(startRecordsEl, null);
+  renderSideScores();
   startScreen.classList.remove('hidden');
   startBtn.focus();
 }
