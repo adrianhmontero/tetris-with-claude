@@ -450,6 +450,48 @@ kbd {
   border-color: var(--value);
 }
 
+/* Vintage: papel beige (tema claro) / café y vino (tema oscuro) */
+:root[data-skin="vintage"] {
+  --bg: #2b1a17;
+  --text: #ecdcbc;
+  --board-bg: #3a2420;
+  --border: #6b4430;
+  --board-shadow: rgba(20, 8, 6, 0.65);
+  --grid: #4a2f27;
+  --label: #a98a64;
+  --value: #e0a526;
+  --muted: #b39b78;
+  --kbd-bg: #4a2a2a;
+  --kbd-border: #7a4a3a;
+  --kbd-text: #e3cfa5;
+  --overlay-bg: rgba(43, 20, 20, 0.82);
+  --danger: #d9626b;
+  --btn-bg: #9b2f45;
+  --btn-bg-hover: #b53d56;
+  --btn-text: #f6e8c8;
+  --title-glow: 0px;
+}
+
+:root[data-skin="vintage"][data-theme="light"] {
+  --bg: #eadbb8;
+  --text: #4a2f22;
+  --board-bg: #f6ebcf;
+  --border: #b8976a;
+  --board-shadow: rgba(90, 55, 25, 0.28);
+  --grid: #e3d2a8;
+  --label: #8a6a48;
+  --value: #8e2c3f;
+  --muted: #7a6045;
+  --kbd-bg: #e2cf9f;
+  --kbd-border: #b8976a;
+  --kbd-text: #4a2f22;
+  --overlay-bg: rgba(234, 219, 184, 0.86);
+  --danger: #9b2335;
+  --btn-bg: #7b2335;
+  --btn-bg-hover: #96304a;
+  --btn-text: #f6ebcf;
+}
+
 /* Neón fuerza fondo negro en ambos temas */
 :root[data-skin="neon"] #board,
 :root[data-skin="neon"] #next-canvas {
