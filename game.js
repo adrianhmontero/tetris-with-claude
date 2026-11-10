@@ -641,6 +641,36 @@ function renderRecords(container, highlight) {
   container.appendChild(b);
 }
 
+function renderSideScores() {
+  const ol = document.getElementById('side-scores-list');
+  if (!ol) return;
+  ol.textContent = '';
+  const list = loadRecords();
+  if (!list.length) {
+    const li = document.createElement('li');
+    li.className = 'ss-empty';
+    li.textContent = 'Sin records';
+    ol.appendChild(li);
+    return;
+  }
+  const medals = ['🥇', '🥈', '🥉'];
+  list.forEach((r, i) => {
+    const li = document.createElement('li');
+    li.className = i < 3 ? 'ss-item ss-top ss-p' + (i + 1) : 'ss-item ss-small';
+    const pos = document.createElement('span');
+    pos.className = 'ss-pos';
+    pos.textContent = i < 3 ? medals[i] : String(i + 1);
+    const name = document.createElement('span');
+    name.className = 'ss-name';
+    name.textContent = r.name;
+    const sc = document.createElement('span');
+    sc.className = 'ss-score';
+    sc.textContent = r.score.toLocaleString();
+    li.append(pos, name, sc);
+    ol.appendChild(li);
+  });
+}
+
 function resetRecords() {
   if (!confirm('¿Borrar todos los records?')) return;
   try {
