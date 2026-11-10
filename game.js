@@ -150,6 +150,10 @@ const LINE_SCORES =[0, 100, 300, 500, 800];
 const BOLT_SCORE_STEP = 2000; // puntos necesarios para cargar un rayo
 const BOLT_MS = 500;          // duración del efecto del rayo
 
+const BOMB_SCORE_STEP = 3000; // puntos necesarios para cargar una bomba
+const BOMB_MS = 700;          // duración del efecto de la bomba
+const BOMB_RADIUS = 3;        // radio (en celdas) de la explosión
+
 const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
 const nextCanvas = document.getElementById('next-canvas');
@@ -158,6 +162,7 @@ const scoreEl = document.getElementById('score');
 const linesEl = document.getElementById('lines');
 const levelEl = document.getElementById('level');
 const boltEl = document.getElementById('bolt');
+const bombEl = document.getElementById('bomb');
 const overlay = document.getElementById('overlay');
 const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
@@ -208,7 +213,7 @@ let resumeUntil = 0;
 let gameStartLevel = 1;       // nivel inicial de la partida en curso
 window.addEventListener('blur', () => { heldKeys.clear(); blockedKeys.clear(); });
 
-let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId, bolt, nextBoltAt;
+let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId, bolt, nextBoltAt, bomb, nextBombAt;
 
 function createBoard() {
   return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
@@ -316,7 +321,7 @@ function softDrop() {
 function lockPiece() {
   merge();
   clearLines();
-  if (tryStartBolt()) return; // spawn() se llama al terminar el rayo
+  if (tryStartBolt() || tryStartBomb()) return; // spawn() se llama al terminar el efecto
   spawn();
 }
 
@@ -346,6 +351,36 @@ function finishBolt() {
   bolt = null;
   canvas.classList.remove('shake');
   updateHUD();
+  if (!tryStartBomb()) spawn();
+}
+
+function tryStartBomb() {
+  if (score < nextBombAt) return false;
+  const cells = [];
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < COLS; c++)
+      if (board[r][c]) cells.push({ r, c });
+  if (!cells.length) return false; // tablero vacío: la bomba queda pendiente
+  const pick = cells[Math.floor(Math.random() * cells.length)];
+  bomb = { r: pick.r, c: pick.c, t: 0 };
+  nextBombAt = (Math.floor(score / BOMB_SCORE_STEP) + 1) * BOMB_SCORE_STEP;
+  canvas.classList.add('shake');
+  updateHUD();
+  return true;
+}
+
+function inBombRange(r, c) {
+  const dr = r - bomb.r, dc = c - bomb.c;
+  return dr * dr + dc * dc <= BOMB_RADIUS * BOMB_RADIUS;
+}
+
+function finishBomb() {
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < COLS; c++)
+      if (inBombRange(r, c)) board[r][c] = 0;
+  bomb = null;
+  canvas.classList.remove('shake');
+  updateHUD();
   spawn();
 }
 
@@ -363,6 +398,7 @@ function updateHUD() {
   linesEl.textContent = lines;
   levelEl.textContent = level;
   boltEl.textContent = Math.max(0, nextBoltAt - score).toLocaleString();
+  bombEl.textContent = Math.max(0, nextBombAt - score).toLocaleString();
 }
 
 function drawBlock(context, x, y, colorIndex, size, alpha) {
@@ -398,6 +434,10 @@ function draw() {
 
   if (bolt) {
     drawBolt();
+    return;
+  }
+  if (bomb) {
+    drawBomb();
     return;
   }
 
@@ -467,6 +507,44 @@ function drawBolt() {
   ctx.textBaseline = 'middle';
   ctx.fillText('¡RAYO!', canvas.width / 2, canvas.height / 2);
 
+  ctx.restore();
+}
+
+function drawBomb() {
+  const p = Math.min(bomb.t / BOMB_MS, 1);
+  const cx = (bomb.c + 0.5) * BLOCK, cy = (bomb.r + 0.5) * BLOCK;
+  const R = (BOMB_RADIUS + 0.5) * BLOCK;
+
+  ctx.save();
+  // celdas condenadas parpadean en rojo
+  ctx.fillStyle = '#ff1744';
+  ctx.globalAlpha = 0.25 + 0.25 * Math.abs(Math.sin(bomb.t / 60));
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < COLS; c++)
+      if (inBombRange(r, c)) ctx.fillRect(c * BLOCK, r * BLOCK, BLOCK, BLOCK);
+
+  // bola de fuego creciente
+  const rad = Math.max(1, R * Math.min(p * 1.6, 1));
+  const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, rad);
+  g.addColorStop(0, '#ffffff');
+  g.addColorStop(0.35, '#ffeb3b');
+  g.addColorStop(0.7, '#ff6d00');
+  g.addColorStop(1, 'rgba(255,23,68,0)');
+  ctx.globalAlpha = 1 - Math.max(0, p - 0.6) / 0.4;
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+  ctx.fill();
+
+  // texto
+  ctx.globalAlpha = 1 - p;
+  ctx.fillStyle = '#fff';
+  ctx.shadowColor = '#ff1744';
+  ctx.shadowBlur = 10;
+  ctx.font = 'bold 36px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('¡BOMBA!', canvas.width / 2, canvas.height / 2);
   ctx.restore();
 }
 
@@ -737,10 +815,13 @@ function loop(ts) {
   if (bolt) {
     bolt.t += dt;
     if (bolt.t >= BOLT_MS) finishBolt();
+  } else if (bomb) {
+    bomb.t += dt;
+    if (bomb.t >= BOMB_MS) finishBomb();
   } else {
     dropAccum += dt;
   }
-  if (!bolt && dropAccum >= dropInterval) {
+  if (!bolt && !bomb && dropAccum >= dropInterval) {
     dropAccum = 0;
     if (!collide(current.shape, current.x, current.y + 1)) {
       current.y++;
@@ -766,6 +847,8 @@ function init() {
   dropAccum = 0;
   bolt = null;
   nextBoltAt = BOLT_SCORE_STEP;
+  bomb = null;
+  nextBombAt = BOMB_SCORE_STEP;
   combo = 0;
   bestCombo = 0;
   startScreen.classList.add('hidden');
@@ -805,7 +888,7 @@ document.addEventListener('keydown', e => {
     return;
   }
   if (paused) { menuKey(e); return; }
-  if (gameOver || bolt) return;
+  if (gameOver || bolt || bomb) return;
   if (blockedKeys.has(e.code) || performance.now() < resumeUntil) {
     if (e.code === 'Space') e.preventDefault();
     return;
