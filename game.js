@@ -102,6 +102,31 @@ const SKINS = {
       context.restore();
     },
   },
+  vintage: {
+    // mostaza, vino, terracota, verde oliva, azul petróleo, café y rosa viejo
+    colors: [null, '#4f8a8b', '#e0a526', '#8e4a6b', '#7d8f3f', '#a8283c', '#3f5e7a', '#c9702f', '#c98a8a'],
+    gridColor: null,
+    drawBlock(context, x, y, color, size, alpha) {
+      context.save();
+      context.globalAlpha = alpha;
+      const px = x * size + 1, py = y * size + 1, s = size - 2;
+      context.fillStyle = color;
+      roundRectPath(context, px, py, s, s, 3);
+      context.fill();
+      // luz cálida arriba/izquierda y sombra café abajo/derecha (aspecto de bakelita)
+      context.fillStyle = 'rgba(255,236,190,0.28)';
+      context.fillRect(px + 2, py + 2, s - 4, 3);
+      context.fillRect(px + 2, py + 2, 3, s - 4);
+      context.fillStyle = 'rgba(60,30,15,0.28)';
+      context.fillRect(px + 2, py + s - 5, s - 4, 3);
+      context.fillRect(px + s - 5, py + 2, 3, s - 4);
+      context.strokeStyle = 'rgba(55,32,20,0.7)';
+      context.lineWidth = 1;
+      roundRectPath(context, px + 0.5, py + 0.5, s - 1, s - 1, 3);
+      context.stroke();
+      context.restore();
+    },
+  },
 };
 let currentSkin = 'retro';
 

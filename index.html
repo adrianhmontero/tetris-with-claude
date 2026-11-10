@@ -12,7 +12,7 @@
     } catch (e) {}
     try {
       var s = localStorage.getItem('skin');
-      if (['retro', 'neon', 'pastel', 'pixel'].indexOf(s) >= 0) document.documentElement.dataset.skin = s;
+      if (['retro', 'neon', 'pastel', 'pixel', 'vintage'].indexOf(s) >= 0) document.documentElement.dataset.skin = s;
     } catch (e) {}
   </script>
 </head>
@@ -67,6 +67,7 @@
             <option value="neon">Neón</option>
             <option value="pastel">Pastel</option>
             <option value="pixel">Pixel art</option>
+            <option value="vintage">Vintage</option>
           </select>
         </div>
 
