@@ -69,10 +69,6 @@
             <option value="pixel">Pixel art</option>
           </select>
         </div>
-
-        <div class="panel-section">
-          <button id="theme-toggle" type="button" aria-pressed="false">Modo claro</button>
-        </div>
       </aside>
     </div>
 
@@ -116,8 +112,12 @@
             <li><kbd>Space</kbd> caída</li>
             <li><kbd>P</kbd> / <kbd>Esc</kbd> pausa</li>
           </ul>
-          <button type="button" id="pm-level">Nivel inicial: <span id="pm-level-val">1</span></button>
-          <p class="pause-hint">↑↓ navegar · Enter elegir · ←→ cambiar nivel</p>
+          <button type="button" id="pm-level"><span id="pm-level-icon" class="pm-icon" aria-hidden="true">😇</span>Nivel inicial: <span id="pm-level-val">1</span></button>
+          <button type="button" id="pm-theme" aria-pressed="false">
+            <svg id="pm-theme-icon" class="pm-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"></svg>
+            <span id="pm-theme-label">Tema: Oscuro</span>
+          </button>
+          <p class="pause-hint">↑↓ navegar · Enter elegir · ←→ cambiar nivel/tema</p>
         </div>
       </div>
     </div>

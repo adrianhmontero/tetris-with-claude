@@ -163,23 +163,6 @@ kbd {
   color: var(--kbd-text);
 }
 
-/* ---- Botón de tema ---- */
-#theme-toggle {
-  background: var(--kbd-bg);
-  color: var(--text);
-  border: 1px solid var(--kbd-border);
-  border-radius: 6px;
-  padding: 6px 10px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-#theme-toggle:hover {
-  border-color: var(--value);
-}
-
 /* ---- Overlay ---- */
 .overlay {
   position: absolute;
@@ -395,6 +378,30 @@ kbd {
   letter-spacing: 1px;
   cursor: pointer;
   transition: background 0.15s;
+}
+
+.pause-list button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.pm-icon {
+  flex: none;
+  font-size: 18px;
+  line-height: 1;
+  width: 18px;
+  height: 18px;
+  text-align: center;
+}
+
+#pm-theme-icon {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .pause-list button:hover {

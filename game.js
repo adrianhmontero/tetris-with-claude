@@ -144,8 +144,15 @@ const pmControls = document.getElementById('pm-controls');
 const pmControlsList = document.getElementById('pm-controls-list');
 const pmLevel = document.getElementById('pm-level');
 const pmLevelVal = document.getElementById('pm-level-val');
-const pmButtons = [pmResume, pmRestart, pmControls, pmLevel];
-const themeBtn = document.getElementById('theme-toggle');
+const pmLevelIcon = document.getElementById('pm-level-icon');
+const themeBtn = document.getElementById('pm-theme');
+const themeIcon = document.getElementById('pm-theme-icon');
+const themeLabel = document.getElementById('pm-theme-label');
+const pmButtons = [pmResume, pmRestart, pmControls, pmLevel, themeBtn];
+// Cara por nivel inicial: de amigable (1) a diablo (10)
+const LEVEL_ICONS = ['😇', '😊', '🙂', '😏', '😎', '😤', '😠', '😡', '👿', '😈'];
+const SUN_SVG = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+const MOON_SVG = '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
 let gridColor = '#22222e';
 const skinSelect = document.getElementById('skin-select');
 
@@ -629,6 +636,7 @@ function openPauseMenu() {
   pmControlsList.classList.add('hidden');
   pmControls.setAttribute('aria-expanded', 'false');
   pmLevelVal.textContent = startLevel;
+  pmLevelIcon.textContent = LEVEL_ICONS[startLevel - 1];
   pauseMenu.classList.remove('hidden');
   pmResume.focus();
 }
@@ -641,6 +649,7 @@ function closePauseMenu() {
 function changeStartLevel(delta) {
   startLevel = Math.min(MAX_START_LEVEL, Math.max(1, startLevel + delta));
   pmLevelVal.textContent = startLevel;
+  pmLevelIcon.textContent = LEVEL_ICONS[startLevel - 1];
   try { localStorage.setItem('startLevel', String(startLevel)); } catch (e) {}
 }
 
@@ -665,6 +674,7 @@ function menuKey(e) {
     case 'ArrowRight':
       e.preventDefault();
       if (document.activeElement === pmLevel) changeStartLevel(e.code === 'ArrowRight' ? 1 : -1);
+      else if (document.activeElement === themeBtn) toggleTheme();
       break;
     // Enter/Espacio: el botón enfocado se activa de forma nativa
   }
@@ -820,7 +830,8 @@ function setTheme(theme, save = true) {
   document.documentElement.dataset.theme = theme;
   resolveGridColor();
   const isLight = theme === 'light';
-  themeBtn.textContent = isLight ? 'Modo oscuro' : 'Modo claro';
+  themeLabel.textContent = isLight ? 'Tema: Claro' : 'Tema: Oscuro';
+  themeIcon.innerHTML = isLight ? SUN_SVG : MOON_SVG;
   themeBtn.setAttribute('aria-pressed', String(isLight));
   if (save) {
     try { localStorage.setItem('theme', theme); } catch (e) {}
@@ -829,10 +840,11 @@ function setTheme(theme, save = true) {
   if (current) { draw(); drawNext(); }
 }
 
-themeBtn.addEventListener('click', () => {
+function toggleTheme() {
   setTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light');
-  themeBtn.blur(); // evita que Espacio active el botón
-});
+}
+
+themeBtn.addEventListener('click', toggleTheme);
 
 setTheme(document.documentElement.dataset.theme === 'light' ? 'light' : 'dark', false);
 
