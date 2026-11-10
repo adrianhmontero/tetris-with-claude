@@ -159,7 +159,7 @@ const skinSelect = document.getElementById('skin-select');
 // Records locales
 const RECORDS_KEY = 'tetrisRecords';
 const BESTS_KEY = 'tetrisBests';
-const MAX_RECORDS = 5;
+const MAX_RECORDS = 10;
 const startScreen = document.getElementById('start-screen');
 const startBtn = document.getElementById('start-btn');
 const startRecordsEl = document.getElementById('start-records');
@@ -466,7 +466,7 @@ function endGame() {
 
   if (qualifies(score)) {
     // Mientras se pide el nombre no se puede reiniciar ni borrar records (se perdería la puntuación)
-    recordMsg.textContent = '¡Entraste en el top 5! Escribe tu nombre';
+    recordMsg.textContent = '¡Entraste en el top 10! Escribe tu nombre';
     recordName.value = 'Jugador';
     recordEntry.classList.remove('hidden');
     overlayRecordsEl.classList.add('hidden');
@@ -507,10 +507,19 @@ function loadRecords() {
         date: String(r.date ?? ''),
       }))
       .sort((a, b) => b.score - a.score)
+      .filter((r, i, arr) => arr.findIndex(o => nameKey(o.name) === nameKey(r.name)) === i) // nombres únicos: se conserva la mejor puntuación
       .slice(0, MAX_RECORDS);
   } catch (e) {
     return [];
   }
+}
+
+function cleanName(n) {
+  return String(n).replace(/\s+/g, ' ').trim().slice(0, 12) || 'Jugador';
+}
+
+function nameKey(n) {
+  return cleanName(n).toLocaleLowerCase();
 }
 
 function saveRecords(list) {
@@ -541,14 +550,21 @@ function qualifies(s) {
 
 function submitRecord() {
   if (recordEntry.classList.contains('hidden')) return; // evita doble guardado
+  const name = cleanName(recordName.value);
+  const list = loadRecords();
+  if (list.some(r => nameKey(r.name) === nameKey(name))) {
+    recordMsg.textContent = `El nombre "${name}" ya existe. Elige otro distinto`;
+    recordName.focus();
+    recordName.select();
+    return;
+  }
   const entry = {
-    name: recordName.value.trim().slice(0, 12) || 'Jugador',
+    name,
     score,
     lines,
     combo: bestCombo,
     date: new Date().toISOString().slice(0, 10),
   };
-  const list = loadRecords();
   let idx = list.findIndex(r => r.score < entry.score);
   if (idx === -1) idx = list.length;
   list.splice(idx, 0, entry);
