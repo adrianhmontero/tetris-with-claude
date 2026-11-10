@@ -678,6 +678,7 @@ function submitRecord() {
   overlayResetBtn.classList.remove('hidden');
   restartBtn.style.display = '';
   renderRecords(overlayRecordsEl, idx < MAX_RECORDS ? idx : null);
+  renderSideScores();
   restartBtn.focus();
 }
 
@@ -719,6 +720,36 @@ function renderRecords(container, highlight) {
   container.appendChild(b);
 }
 
+function renderSideScores() {
+  const ol = document.getElementById('side-scores-list');
+  if (!ol) return;
+  ol.textContent = '';
+  const list = loadRecords();
+  if (!list.length) {
+    const li = document.createElement('li');
+    li.className = 'ss-empty';
+    li.textContent = 'Sin records';
+    ol.appendChild(li);
+    return;
+  }
+  const medals = ['🥇', '🥈', '🥉'];
+  list.forEach((r, i) => {
+    const li = document.createElement('li');
+    li.className = i < 3 ? 'ss-item ss-top ss-p' + (i + 1) : 'ss-item ss-small';
+    const pos = document.createElement('span');
+    pos.className = 'ss-pos';
+    pos.textContent = i < 3 ? medals[i] : String(i + 1);
+    const name = document.createElement('span');
+    name.className = 'ss-name';
+    name.textContent = r.name;
+    const sc = document.createElement('span');
+    sc.className = 'ss-score';
+    sc.textContent = r.score.toLocaleString();
+    li.append(pos, name, sc);
+    ol.appendChild(li);
+  });
+}
+
 function resetRecords() {
   if (!confirm('¿Borrar todos los records?')) return;
   try {
@@ -726,11 +757,13 @@ function resetRecords() {
     localStorage.removeItem(BESTS_KEY);
   } catch (e) {}
   renderRecords(startRecordsEl, null);
+  renderSideScores();
   if (!overlayRecordsEl.classList.contains('hidden')) renderRecords(overlayRecordsEl, null);
 }
 
 function showStartScreen() {
   renderRecords(startRecordsEl, null);
+  renderSideScores();
   startScreen.classList.remove('hidden');
   startBtn.focus();
 }
